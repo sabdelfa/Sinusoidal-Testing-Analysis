@@ -1,4 +1,4 @@
-import matplotlib
+import matplotlib.pyplot as plt
 import scipy
 import numpy as np
 import csv
@@ -85,9 +85,12 @@ def find_e(force, displacement, cross_area, gauge_length):
     for i in range (len(force)):
         strain = force[i]/gauge_length
         strain_array.append(strain)
-
-    res = scipy.stats.linregress(strain_array, stress_array)
+    plt.plot(strain_array, stress_array)
+    plt.show()
+    plt.clf()
+    res = scipy.stats.linregress(stress_array, strain_array)
     return float(res[0])
+
 
 def main():
     cross_sectional_area = 10.176
