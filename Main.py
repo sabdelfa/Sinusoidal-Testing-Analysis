@@ -71,8 +71,8 @@ def read_csv(file_name):
         e_array.append(find_e(temp_force, temp_displacement, sinusoid_count))
 
         print(f'Processed {line_count} lines.')
-        e_array.insert(0,"Youngs Modulus for Sinuoids")
-        pd.DataFrame(e_array).to_csv(active_name+"/"+active_name+'youngs modulus.csv')    
+        e_array.insert(0,"Youngs Modulus for Sinusoids in "+active_name)
+        pd.DataFrame(e_array).to_csv(active_name+"/"+active_name+' Youngs Modulus.csv')    
 
 def find_e(force, displacement, sinusoid_count):
     #this function will process the force displacement data in the two arrays and return youngs modulus
