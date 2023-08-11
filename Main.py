@@ -4,6 +4,7 @@ import numpy as np
 import csv
 import os
 import pandas as pd 
+import glob
 
 #----------------------GLOBAL VARIABLES------------------------
 cross_sectional_area = 10.176
@@ -109,9 +110,14 @@ def stress_strain_plot(stress, strain, sinusoid_count):
     plt.savefig(active_name+"/"+str(sinusoid_count)+".png")    
     plt.clf()
 
+def find_csv():
+    result = glob.glob('*.{}'.format(csv))
+    print(result)
+    
 
 def main():  
-    read_csv("20minuteCure_Sinuoid013Data")
+    find_csv()
+    #read_csv("20minuteCure_Sinuoid013Data")
 
 main()
 
