@@ -2,6 +2,12 @@ import matplotlib.pyplot as plt
 import scipy
 import numpy as np
 import csv
+import os
+import pandas as pd 
+
+def new_directory(dir_name):
+    os.mkdir(dir_name)
+
 
 def read_csv(csvName, cross_area, gauge_length):
     #this function will process the force displacement data in the named CSV file into an array
@@ -9,10 +15,15 @@ def read_csv(csvName, cross_area, gauge_length):
     #--------------INPUTS----------------
     #csvName: the name of the CSV file that you want to read (**IMPORTANT: MUST BE IN THE SAME FOLDER AS MAIN**)
     #------------------------------------
+    fileName = csvName+".csv"
+    global csv_name
+    csv_name = csvName
+    new_directory(csvName)
+
     line_count = 0
     temp_displacement = []
     temp_force = []
-    with open(csvName) as csv_file:
+    with open(fileName) as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
         sinusoid_count = 1 
         e_array = []
@@ -64,8 +75,13 @@ def read_csv(csvName, cross_area, gauge_length):
                             #so append the two arrays to our bigger array, empty them, and start brand new
                             #and then increment sinusoid_count                    
             line_count += 1
+        e = find_e(temp_force, temp_displacement, cross_area, gauge_length, sinusoid_count)
+        e_array.append(e)
+        print("youngs modulus for sinusoid", sinusoid_count, "is", e)
+        sinusoid_count = sinusoid_count+1
         print(f'Processed {line_count} lines.')
         print(e_array)
+        pd.DataFrame(e_array).to_csv(csv_name+"/"+csv_name+'youngs modulus.csv')    
 
 def find_e(force, displacement, cross_area, gauge_length, sinusoid_count):
     #this function will process the force displacement data in the two arrays and return youngs modulus
@@ -77,6 +93,7 @@ def find_e(force, displacement, cross_area, gauge_length, sinusoid_count):
     print("force array length is", len(force), "displacement array length is", len(displacement))
     stress_array = []
     strain_array = []
+
     #find stress: force/cross sectional area
     #find strain: displacement/gauge length
 
@@ -86,21 +103,28 @@ def find_e(force, displacement, cross_area, gauge_length, sinusoid_count):
     for i in range (len(force)):
         strain = force[i]/gauge_length
         strain_array.append(strain)
-    plt.plot(strain_array, stress_array)
-    plt.ylabel("Stress")
-    plt.xlabel("Strain")
-    plt.title(sinusoid_count)
-    #save the plot
-    plt.savefig(sinusoid_count)    
-    plt.clf()
+
+    stress_strain_plot(stress_array, strain_array, sinusoid_count)
     res = scipy.stats.linregress(stress_array, strain_array)
     return float(res[0])
+
+def stress_strain_plot(stress, strain, sinusoid_count):
+    
+    plt.plot(strain, stress)
+    plt.ylabel("Stress")
+    plt.xlabel("Strain")
+    plt.title("Stress-Strain Curve for Sinusoid Repetition #"+str(sinusoid_count))
+    #save the plot
+    plt.savefig(csv_name+"/"+str(sinusoid_count)+".png")    
+    plt.clf()
 
 
 def main():
     cross_sectional_area = 10.176
     gauge_length = 9.53
-    read_csv("20minuteCure_Sinuoid013Data.csv", cross_sectional_area, gauge_length)
+    #new_directory("test11")
+    #stress_strain_plot([1,2,3], [1,2,3], 1)
+    read_csv("20minuteCure_Sinuoid013Data", cross_sectional_area, gauge_length)
 
 main()
 
