@@ -10,6 +10,8 @@ def read_csv(csvName, cross_area, gauge_length):
     #csvName: the name of the CSV file that you want to read (**IMPORTANT: MUST BE IN THE SAME FOLDER AS MAIN**)
     #------------------------------------
     line_count = 0
+    temp_displacement = []
+    temp_force = []
     with open(csvName) as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
         sinusoid_count = 1 
@@ -27,17 +29,20 @@ def read_csv(csvName, cross_area, gauge_length):
                     pass
                 else:
                     #now we've determined we are in a stretch phase 
-                    temp_displacement = []
-                    temp_force = []
-                    if definer[0]==sinusoid_count:
-                        temp_displacement.append(row[4])
-                        temp_force.append(row[5])
+                    if int(definer[0])==sinusoid_count:
+                        print("definer 0 is sinusoid count")
+                        temp_displacement.append(float(row[4]))
+                        temp_force.append(float(row[5]))
                         #add the force and displacement to the temp arrays
                     else:
+                        #print(temp_displacement)
                         #we're on a new sinusoid
+                        #print(temp_force)
                         find_e(temp_force, temp_displacement, cross_area, gauge_length)
                         e_array.append(find_e)
                         sinusoid_count = sinusoid_count+1
+                        #temp_displacement = []
+                        #temp_force = []
                         #so append the two arrays to our bigger array, empty them, and start brand new
                         #and then increment sinusoid_count
             line_count += 1
@@ -64,7 +69,7 @@ def find_e(force, displacement, cross_area, gauge_length):
         strain_array.append(strain)
 
     res = scipy.stats.linregress(strain_array, stress_array)
-    return res[0]
+    return float(res[0])
 
 def main():
     cross_sectional_area = 10.176
