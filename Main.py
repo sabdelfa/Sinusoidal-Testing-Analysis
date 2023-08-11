@@ -36,12 +36,12 @@ def read_csv(csvName, cross_area, gauge_length):
                             #add the force and displacement to the temp arrays
                         else:
                             #we're on a new sinusoid
-                            e = find_e(temp_force, temp_displacement, cross_area, gauge_length)
+                            e = find_e(temp_force, temp_displacement, cross_area, gauge_length, sinusoid_count)
                             e_array.append(e)
                             print("youngs modulus for sinusoid", sinusoid_count, "is", e)
                             sinusoid_count = sinusoid_count+1
-                            #temp_displacement = []
-                            #temp_force = []
+                            temp_displacement = []
+                            temp_force = []
                             #so append the two arrays to our bigger array, empty them, and start brand new
                             #and then increment sinusoid_count
                 else:
@@ -55,25 +55,26 @@ def read_csv(csvName, cross_area, gauge_length):
                             #add the force and displacement to the temp arrays
                         else:
                             #we're on a new sinusoid
-                            e = find_e(temp_force, temp_displacement, cross_area, gauge_length)
+                            e = find_e(temp_force, temp_displacement, cross_area, gauge_length, sinusoid_count)
                             e_array.append(e)
                             print("youngs modulus for sinusoid", sinusoid_count, "is", e)
                             sinusoid_count = sinusoid_count+1
-                            #temp_displacement = []
-                            #temp_force = []
+                            temp_displacement = []
+                            temp_force = []
                             #so append the two arrays to our bigger array, empty them, and start brand new
                             #and then increment sinusoid_count                    
             line_count += 1
         print(f'Processed {line_count} lines.')
         print(e_array)
 
-def find_e(force, displacement, cross_area, gauge_length):
+def find_e(force, displacement, cross_area, gauge_length, sinusoid_count):
     #this function will process the force displacement data in the two arrays and return youngs modulus
 
     #--------------INPUTS----------------
     #force: an array of doubles represeting force in newtons
     #displacement: an array of doubles representing displacement in mm
     #------------------------------------
+    print("force array length is", len(force), "displacement array length is", len(displacement))
     stress_array = []
     strain_array = []
     #find stress: force/cross sectional area
@@ -86,7 +87,11 @@ def find_e(force, displacement, cross_area, gauge_length):
         strain = force[i]/gauge_length
         strain_array.append(strain)
     plt.plot(strain_array, stress_array)
-    plt.show()
+    plt.ylabel("Stress")
+    plt.xlabel("Strain")
+    plt.title(sinusoid_count)
+    #save the plot
+    plt.savefig(sinusoid_count)    
     plt.clf()
     res = scipy.stats.linregress(stress_array, strain_array)
     return float(res[0])
