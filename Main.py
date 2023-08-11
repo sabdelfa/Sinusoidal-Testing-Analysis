@@ -25,26 +25,44 @@ def read_csv(csvName, cross_area, gauge_length):
                 #that is going to give us a character array "1","_","S","t","r","e","t","c","h"
                 #definer[0] will tell us which cycle we're in (1-20)
                 #definer[2] will be either S (we want this data) or P or R (we dont want this data)
-                if definer[2] == "P" or definer[2] == "R":
-                    pass
-                else:
-                    #now we've determined we are in a stretch phase 
-                    if int(definer[0])==sinusoid_count:
-                        print("definer 0 is sinusoid count")
-                        temp_displacement.append(float(row[4]))
-                        temp_force.append(float(row[5]))
-                        #add the force and displacement to the temp arrays
+                if sinusoid_count<10:
+                    if definer[2] == "P" or definer[2] == "R":
+                        pass
                     else:
-                        #print(temp_displacement)
-                        #we're on a new sinusoid
-                        #print(temp_force)
-                        find_e(temp_force, temp_displacement, cross_area, gauge_length)
-                        e_array.append(find_e)
-                        sinusoid_count = sinusoid_count+1
-                        #temp_displacement = []
-                        #temp_force = []
-                        #so append the two arrays to our bigger array, empty them, and start brand new
-                        #and then increment sinusoid_count
+                        #now we've determined we are in a stretch phase 
+                        if int(definer[0])==sinusoid_count:
+                            temp_displacement.append(float(row[4]))
+                            temp_force.append(float(row[5]))
+                            #add the force and displacement to the temp arrays
+                        else:
+                            #we're on a new sinusoid
+                            e = find_e(temp_force, temp_displacement, cross_area, gauge_length)
+                            e_array.append(e)
+                            print("youngs modulus for sinusoid", sinusoid_count, "is", e)
+                            sinusoid_count = sinusoid_count+1
+                            #temp_displacement = []
+                            #temp_force = []
+                            #so append the two arrays to our bigger array, empty them, and start brand new
+                            #and then increment sinusoid_count
+                else:
+                    if definer[3] == "P" or definer[3] == "R":
+                        pass
+                    else:
+                        #now we've determined we are in a stretch phase 
+                        if int(definer[0]+definer[1])==sinusoid_count:
+                            temp_displacement.append(float(row[4]))
+                            temp_force.append(float(row[5]))
+                            #add the force and displacement to the temp arrays
+                        else:
+                            #we're on a new sinusoid
+                            e = find_e(temp_force, temp_displacement, cross_area, gauge_length)
+                            e_array.append(e)
+                            print("youngs modulus for sinusoid", sinusoid_count, "is", e)
+                            sinusoid_count = sinusoid_count+1
+                            #temp_displacement = []
+                            #temp_force = []
+                            #so append the two arrays to our bigger array, empty them, and start brand new
+                            #and then increment sinusoid_count                    
             line_count += 1
         print(f'Processed {line_count} lines.')
         print(e_array)
