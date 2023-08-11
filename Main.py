@@ -5,34 +5,43 @@ import csv
 import os
 import pandas as pd 
 
+#----------------------GLOBAL VARIABLES------------------------
+cross_sectional_area = 10.176
+gauge_length = 9.53
+
 def new_directory(dir_name):
-    os.mkdir(dir_name)
+    if not os.path.exists(dir_name):
+        os.mkdir(dir_name)
+        print("Folder %s created!" % dir_name)
+    else:
+        print("Folder %s already exists" % dir_name)
 
-
-def read_csv(csvName, cross_area, gauge_length):
+def read_csv(csv_name):
     #this function will process the force displacement data in the named CSV file into an array
 
-    #--------------INPUTS----------------
-    #csvName: the name of the CSV file that you want to read (**IMPORTANT: MUST BE IN THE SAME FOLDER AS MAIN**)
-    #------------------------------------
-    fileName = csvName+".csv"
-    global csv_name
-    csv_name = csvName
-    new_directory(csvName)
+    #--------------INPUTS--------------------------------------------------------------------------------------
+    #csv_name: the name of the CSV file that you want to read (**IMPORTANT: MUST BE IN THE SAME FOLDER AS MAIN**)
+    global active_name
+    active_name = csv_name
+    #----------------------------------------------------------------------------------------------------------
+
+    fileName = csv_name+".csv"
+    new_directory(active_name)
 
     line_count = 0
     temp_displacement = []
     temp_force = []
+    e_array = []
+
     with open(fileName) as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
         sinusoid_count = 1 
-        e_array = []
-        print("check one")
         for row in csv_reader:            
             if line_count == 0:
-                print(row)
+                pass
             else:
-                definer = list(row[1]) #at index 1 we expect to see a string of the form int_word (e.g. 1_Stretch), but we only care if it is int_"stretch"
+                definer = list(row[1]) 
+                #at index 1 we expect to see a string of the form int_word (e.g. 1_Stretch), but we only care if it is int_"stretch"
                 #that is going to give us a character array "1","_","S","t","r","e","t","c","h"
                 #definer[0] will tell us which cycle we're in (1-20)
                 #definer[2] will be either S (we want this data) or P or R (we dont want this data)
@@ -47,7 +56,7 @@ def read_csv(csvName, cross_area, gauge_length):
                             #add the force and displacement to the temp arrays
                         else:
                             #we're on a new sinusoid
-                            e = find_e(temp_force, temp_displacement, cross_area, gauge_length, sinusoid_count)
+                            e = find_e(temp_force, temp_displacement, sinusoid_count)
                             e_array.append(e)
                             print("youngs modulus for sinusoid", sinusoid_count, "is", e)
                             sinusoid_count = sinusoid_count+1
@@ -66,7 +75,7 @@ def read_csv(csvName, cross_area, gauge_length):
                             #add the force and displacement to the temp arrays
                         else:
                             #we're on a new sinusoid
-                            e = find_e(temp_force, temp_displacement, cross_area, gauge_length, sinusoid_count)
+                            e = find_e(temp_force, temp_displacement, sinusoid_count)
                             e_array.append(e)
                             print("youngs modulus for sinusoid", sinusoid_count, "is", e)
                             sinusoid_count = sinusoid_count+1
@@ -75,15 +84,15 @@ def read_csv(csvName, cross_area, gauge_length):
                             #so append the two arrays to our bigger array, empty them, and start brand new
                             #and then increment sinusoid_count                    
             line_count += 1
-        e = find_e(temp_force, temp_displacement, cross_area, gauge_length, sinusoid_count)
+        e = find_e(temp_force, temp_displacement, sinusoid_count)
         e_array.append(e)
         print("youngs modulus for sinusoid", sinusoid_count, "is", e)
         sinusoid_count = sinusoid_count+1
         print(f'Processed {line_count} lines.')
         print(e_array)
-        pd.DataFrame(e_array).to_csv(csv_name+"/"+csv_name+'youngs modulus.csv')    
+        pd.DataFrame(e_array).to_csv(active_name+"/"+active_name+'youngs modulus.csv')    
 
-def find_e(force, displacement, cross_area, gauge_length, sinusoid_count):
+def find_e(force, displacement, sinusoid_count):
     #this function will process the force displacement data in the two arrays and return youngs modulus
 
     #--------------INPUTS----------------
@@ -98,7 +107,7 @@ def find_e(force, displacement, cross_area, gauge_length, sinusoid_count):
     #find strain: displacement/gauge length
 
     for i in range (len(displacement)):
-        stress = displacement[i]/cross_area
+        stress = displacement[i]/cross_sectional_area
         stress_array.append(stress)
     for i in range (len(force)):
         strain = force[i]/gauge_length
@@ -115,16 +124,12 @@ def stress_strain_plot(stress, strain, sinusoid_count):
     plt.xlabel("Strain")
     plt.title("Stress-Strain Curve for Sinusoid Repetition #"+str(sinusoid_count))
     #save the plot
-    plt.savefig(csv_name+"/"+str(sinusoid_count)+".png")    
+    plt.savefig(active_name+"/"+str(sinusoid_count)+".png")    
     plt.clf()
 
 
-def main():
-    cross_sectional_area = 10.176
-    gauge_length = 9.53
-    #new_directory("test11")
-    #stress_strain_plot([1,2,3], [1,2,3], 1)
-    read_csv("20minuteCure_Sinuoid013Data", cross_sectional_area, gauge_length)
+def main():  
+    read_csv("20minuteCure_Sinuoid013Data")
 
 main()
 
