@@ -17,16 +17,16 @@ def new_directory(dir_name):
     else:
         print("Folder %s already exists" % dir_name)
 
-def read_csv(csv_name):
+def read_csv(file_name):
     #this function will process the force displacement data in the named CSV file into an array
 
     #--------------INPUTS--------------------------------------------------------------------------------------
     #csv_name: the name of the CSV file that you want to read (**IMPORTANT: MUST BE IN THE SAME FOLDER AS MAIN**)
-    global active_name
-    active_name = csv_name
     #----------------------------------------------------------------------------------------------------------
 
-    fileName = csv_name+".csv"
+    global active_name
+    size = len(file_name)
+    active_name = file_name[:size - 4]
     new_directory(active_name)
 
     line_count = 0
@@ -34,7 +34,7 @@ def read_csv(csv_name):
     temp_force = []
     e_array = []
 
-    with open(fileName) as csv_file:
+    with open(file_name) as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
         sinusoid_count = 1 
         for row in csv_reader:            
@@ -111,13 +111,16 @@ def stress_strain_plot(stress, strain, sinusoid_count):
     plt.clf()
 
 def find_csv():
-    result = glob.glob('*.{}'.format(csv))
-    print(result)
-    
+    # Path to the folder containing csv files
+    folder_path = os.getcwd()
+
+    # Loop through each file in the user folder
+    for file in os.listdir(folder_path):
+        if file.endswith(".csv"):
+            read_csv(file)
 
 def main():  
     find_csv()
-    #read_csv("20minuteCure_Sinuoid013Data")
 
 main()
 
